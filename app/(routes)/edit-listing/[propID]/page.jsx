@@ -26,22 +26,33 @@ const PropertyDetails = ({ params }) => {
   const { user } = useUser();
   const router = useRouter();
 
-  useEffect(() => {
-    user && verifyUserRecord();
-  }, [user]);
+  // useEffect(() => {
+  //   user && verifyUserRecord();
+  //   console.log(user);
+  // }, [user]);
 
-  const verifyUserRecord = async () => {
-    const { data, error } = await supabase
-      .from("listing")
-      .select("*")
-      .eq("createdBy", user?.primaryEmailAddress?.emailAddress)
-      .eq("id", params.id);
+  // const verifyUserRecord = async () => {
+  //   console.log("PARAMS : ", params.id);
+  //   console.log("2 - ", user);
+  //   const { data, error } = await supabase
+  //     .from("listing")
+  //     .select("*")
+  //     // .eq("createdBy", user?.primaryEmailAddress.emailAddress)
+  //     .eq("id", params.id);
 
-    console.log(data);
-    if (data?.length <= 0) {
-      router.replace("/");
-    }
-  };
+  //   if (error) {
+  //     console.error("Error querying database:", error);
+  //     router.replace("/");
+  //     return;
+  //   }
+
+  //   console.log("Database query result:", data);
+
+  //   if (!data || data.length === 0) {
+  //     console.log("No matching record found.");
+  //     router.replace("/");
+  //   }
+  // };
 
   const handleFormSubmit = async (formValue) => {
     const { data, error } = await supabase

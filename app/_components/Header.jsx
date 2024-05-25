@@ -66,7 +66,7 @@ const Header = () => {
         {isSignedIn && (
           <>
             <Link href={"/add-new-listing"} className="mr-3">
-              <Button>Post Your Ad</Button>
+              <Button className="px-6 text-[16px]">Post Your Ad</Button>
             </Link>
 
             <UserButton />
