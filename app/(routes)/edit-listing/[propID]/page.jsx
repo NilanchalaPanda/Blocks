@@ -20,9 +20,13 @@ import supabase from "@utils/supabase/client";
 import { toast } from "sonner";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import FileUpload from "../_components/FileUpload";
 
 const PropertyDetails = ({ params }) => {
+  // HANLDE IMAGE UPLOAD
+  const [images, setImages] = useState([]);
+
   const { user } = useUser();
   const router = useRouter();
 
@@ -64,7 +68,7 @@ const PropertyDetails = ({ params }) => {
     if (data) {
       console.log(data);
       toast("Listing Updated Successfully");
-    }
+    } 
 
     if (error) {
       console.log(error);
@@ -282,6 +286,12 @@ const PropertyDetails = ({ params }) => {
               </div>
 
               {/* IMAGES */}
+              <div>
+                <h1 className="text-[17px] md:text-xl text-slate-500">
+                  Upload Your Property Images
+                </h1>
+                <FileUpload setImages={setImages} />
+              </div>
 
               {/* SUBMIT THE WHOLE FORM BRO :) */}
               <div className="flex flex-row justify-end gap-x-2">
