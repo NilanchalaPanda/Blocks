@@ -32,7 +32,7 @@ const Header = () => {
   ];
 
   return (
-    <div className="z-10 flex justify-between items-center py-6 px-4 md:px-20">
+    <div className="z-10 flex justify-between items-center py-6 px-4 md:px-20 bg-slate-100 shadow-xl rounded-b-[20px]">
       {/* Logo */}
       <Link href={"/"}>
         <Image src={"/logo.svg"} width={30} height={30} alt="Logo" />

@@ -13,11 +13,36 @@ import {
 import { Button } from "@components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+
+// OTHER IMPORT STATEMENTS
 import { Formik } from "formik";
 import supabase from "@utils/supabase/client";
 import { toast } from "sonner";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const PropertyDetails = ({ params }) => {
+  const { user } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    user && verifyUserRecord();
+  }, [user]);
+
+  const verifyUserRecord = async () => {
+    const { data, error } = await supabase
+      .from("listing")
+      .select("*")
+      .eq("createdBy", user?.primaryEmailAddress?.emailAddress)
+      .eq("id", params.id);
+
+    console.log(data);
+    if (data?.length <= 0) {
+      router.replace("/");
+    }
+  };
+
   const handleFormSubmit = async (formValue) => {
     const { data, error } = await supabase
       .from("listing")
@@ -37,8 +62,8 @@ const PropertyDetails = ({ params }) => {
 
   return (
     <div className="px-3 my-10 lg:px-36">
-      <h1 className="font-bold text-2xl">
-        Enter some more details more your listing
+      <h1 className="px-3 font-bold text-2xl lg:text-3xl">
+        Enter more details for your listing
       </h1>
 
       <Formik
@@ -51,7 +76,7 @@ const PropertyDetails = ({ params }) => {
         {({ values, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
             <div className="px-5 py-8 mt-2 rounded-[9px] border-2 border-purple-200 shadow-xl space-y-2 md:space-y-6 md:shadow-md md:p-8">
-              <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:space-y-0">
                 {/* SELL OR RENT? */}
                 <div className="flex flex-col gap-2">
                   {/* RENT OR SELL */}
@@ -120,7 +145,7 @@ const PropertyDetails = ({ params }) => {
               </div>
 
               {/* Bedroom | Bathroom | Built In */}
-              <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:space-y-0">
                 <div className="flex flex-col gap-2">
                   <div className="text-[17px] md:text-xl text-slate-500">
                     Bedroom
@@ -162,7 +187,7 @@ const PropertyDetails = ({ params }) => {
               </div>
 
               {/* Parking | Lot Size | Area */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 space-y-2 ">
+              <div className="grid grid-cols-1 lg:grid-cols-3 space-y-2 lg:space-y-0">
                 <div className="flex flex-col gap-2">
                   <div className="text-[17px] md:text-xl text-slate-500">
                     Parking
@@ -204,7 +229,7 @@ const PropertyDetails = ({ params }) => {
               </div>
 
               {/* Price | HOA */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 space-y-2 ">
+              <div className="grid grid-cols-1 lg:grid-cols-3 space-y-2 lg:space-y-0">
                 <div className="flex flex-col gap-2">
                   <div className="text-[17px] md:text-xl text-slate-500">
                     Selling Price ($)
