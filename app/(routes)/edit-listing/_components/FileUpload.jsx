@@ -6,12 +6,21 @@ import { useState } from "react";
 
 const FileUpload = ({ setImages }) => {
   const [previewImages, setPreviewImages] = useState([]);
+  const [fileList, setFileList] = useState([]);
 
   const handleFileChange = (e) => {
-    const files = e.target.files;
-    console.log(files);
-    setImages(files);
-    const images = Array.from(files).map((file) => URL.createObjectURL(file));
+    const newfiles = Array.from(e.target.files);
+    console.log(newfiles);
+
+    const combinedFiles = [...fileList, ...newfiles];
+    console.log(combinedFiles);
+    setFileList(combinedFiles);
+    setImages(combinedFiles);
+
+    const images = Array.from(newfiles).map((file) =>
+      URL.createObjectURL(file)
+    );
+
     console.log("PREVIEW -", previewImages);
     setPreviewImages((prevImages) => [...prevImages, ...images]);
   };

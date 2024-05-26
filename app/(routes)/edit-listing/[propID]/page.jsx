@@ -58,21 +58,70 @@ const PropertyDetails = ({ params }) => {
   //   }
   // };
 
+  // console.log(images);
+  // for (const image in images) {
+  //   console.log(Date.now().toString().split(".").pop());
+  // }
+
+  console.log(images);
+
   const handleFormSubmit = async (formValue) => {
-    const { data, error } = await supabase
-      .from("listing")
-      .update(formValue)
-      .eq("id", params.propID)
-      .select();
+    // const { data, error } = await supabase
+    //   .from("listing")
+    //   .update(formValue)
+    //   .eq("id", params.propID)
+    //   .select();
 
-    if (data) {
-      console.log(data);
-      toast("Listing Updated Successfully");
-    } 
+    // if (data) {
+    //   console.log(data);
+    //   toast("Listing Updated Successfully");
+    // }
 
-    if (error) {
-      console.log(error);
+    for (let i = 0; i < images.length; i++) {
+      console.log(images);
+      console.log(images[i].name);
+
+      const { data, error } = await supabase.storage
+        .from("listingImages")
+        .upload(images[i]?.name, images[i], {
+          contentType: images[i].type,
+          upsert: false,
+        });
+
+      if (error) {
+        console.log(error);
+      }
+
+      if (data) {
+        console.log(data);
+        toast("File uploaded");
+      }
     }
+
+    // for (const image in images) {
+    //   let index = 0;
+    //   console.log(images);
+    //   console.log(images[index].name);
+    //   console.log(image.type);
+    //   console.log(image.name);
+    //   const { data, error } = await supabase.storage
+    //     .from("listingImages")
+    //     .upload(`{image?.name}`, image, {
+    //       contentType: image.type,
+    //       upsert: false,
+    //     });
+    //   if (error) {
+    //     console.log(error);
+    //     toast("Error uploading file");
+    //   } else {
+    //     toast("File uploaded");
+    //     index++;
+    //   }
+    // }
+
+    // if (error) {
+    //   console.log(error);
+    // }
   };
 
   return (
