@@ -13,6 +13,17 @@ import {
 import { Button } from "@components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // OTHER IMPORT STATEMENTS
 import { Formik } from "formik";
@@ -22,13 +33,16 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import FileUpload from "../_components/FileUpload";
-import { Loader } from "lucide-react";
+import { Loader, X } from "lucide-react";
+import Image from "next/image";
 
 const PropertyDetails = ({ params }) => {
   // HANLDE IMAGE UPLOAD
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [listing, setListing] = useState([]);
+
+  const [previewPhoto, setPreviewPhoto] = useState([]);
 
   const { user } = useUser();
   const router = useRouter();
@@ -38,9 +52,15 @@ const PropertyDetails = ({ params }) => {
   }, [user]);
 
   const verifyUserRecord = async () => {
+    console.log(user);
+    console.log(params);
     const { data, error } = await supabase
       .from("listing")
-      .select("*")
+      .select(
+        `*, listingImages(
+        listing_id, url
+      )`
+      )
       .eq("createdBy", user?.primaryEmailAddress.emailAddress)
       .eq("id", params.propID);
 
@@ -48,6 +68,7 @@ const PropertyDetails = ({ params }) => {
 
     if (data) {
       setListing(data[0]);
+      setPreviewPhoto(data[0]?.listingImages);
     }
     if (data?.length <= 0) {
       toast("Not Authorized to access this property");
@@ -113,6 +134,24 @@ const PropertyDetails = ({ params }) => {
     }
   };
 
+  const PublishButtonHandler = async () => {
+    setLoading(false);
+    const { data, error } = await supabase
+      .from("listing")
+      .update({ active: true })
+      .eq("id", params.propID)
+      .select();
+
+    if (data) {
+      toast("Listing Published");
+      setLoading(false);
+    }
+    if (error) {
+      toast("Error occured while publishing");
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="px-3 my-10 lg:px-36">
       <h1 className="px-3 font-bold text-2xl lg:text-3xl">
@@ -125,7 +164,7 @@ const PropertyDetails = ({ params }) => {
           fullName: user?.fullName,
         }}
         onSubmit={(values) => {
-          console.log(values);
+          // console.log(values);
           handleFormSubmit(values);
         }}
       >
@@ -347,19 +386,63 @@ const PropertyDetails = ({ params }) => {
                   Upload Your Property Images
                 </h1>
                 <FileUpload setImages={setImages} />
+
+                <div className="px-4 pt-5 grid grid-cols-3 lg:grid-cols-6 xl:grid-cols-10 gap-3">
+                  {previewPhoto.length > 0 &&
+                    previewPhoto.map((image) => (
+                      <div key={image} className="relative">
+                        <Image
+                          src={image?.url}
+                          alt={`image`}
+                          width={100}
+                          height={100}
+                          className="rounded-sm border border-black"
+                        />
+                        <button
+                          type="button"
+                          className="bg-red-300 p-[1px] rounded-sm absolute -top-2 -right-2 hover:cursor-pointer lg:p-[3px] ld:rounded-lg"
+                        >
+                          <X size={15} color="red" />
+                        </button>
+                      </div>
+                    ))}
+                </div>
               </div>
 
               {/* SUBMIT THE WHOLE FORM BRO :) */}
               <div className="flex flex-row justify-end gap-x-2">
-                <Button variant="outline">Save</Button>
-
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
-                    <Loader className="animate-spin" />
-                  ) : (
-                    "Save & Publish"
-                  )}
+                <Button
+                  variant="outline"
+                  className="text-primary bg-primary"
+                  type="submit"
+                  disabled={loading}
+                >
+                  {loading ? <Loader className="animate-spin" /> : "Save"}
                 </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button">Save & Publish</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Ready to publish?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Do you really want to publish the listing.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => PublishButtonHandler()}>
+                        {loading ? (
+                          <Loader className="animate-spin" />
+                        ) : (
+                          "Publish"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           </form>
