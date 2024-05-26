@@ -65,8 +65,8 @@ const FileUpload = ({ setImages }) => {
         </label>
       </div>
       <div className="px-4 pt-5 grid grid-cols-3 lg:grid-cols-6 xl:grid-cols-10 gap-3">
-        {previewImages.map((image) => (
-          <div key={image} className="relative">
+        {previewImages.map((image, index) => (
+          <div key={index} className="relative">
             <Image
               src={image}
               alt={`image`}

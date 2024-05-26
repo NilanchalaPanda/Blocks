@@ -6,6 +6,7 @@ import { Button } from "@components/ui/button";
 import { CircleX, MenuIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import React, { useState, useEffect } from "react";
 
 const Header = () => {
@@ -14,13 +15,15 @@ const Header = () => {
   // State to manage the user's login status
   const { user, isSignedIn } = useUser();
 
+  const path = usePathname();
+
   const handleNav = () => {
     setNav((prev) => !prev);
   };
 
   // Navigation items for logged in users
   const loggedInNavItems = [
-    { id: 1, text: "For Sale", to: "/sale" },
+    { id: 1, text: "For Sell", to: "/sell" },
     { id: 2, text: "For Rent", to: "/rent" },
     { id: 3, text: "Agent Finder", to: "/agents" },
   ];
@@ -43,8 +46,10 @@ const Header = () => {
         {(isSignedIn ? loggedInNavItems : loggedOutNavItems).map((item) => (
           <Link
             href={item.to}
-            key={item.id}
-            className="hover:text-purple-800 px-4 font-medium cursor-pointer duration-300"
+            key={item.text}
+            className={`hover:text-purple-800 px-4 font-medium cursor-pointer duration-300 ${
+              path === item.to ? "text-primary" : ""
+            }`}
           >
             {item.text}
           </Link>

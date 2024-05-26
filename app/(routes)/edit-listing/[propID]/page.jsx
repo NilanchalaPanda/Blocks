@@ -52,8 +52,8 @@ const PropertyDetails = ({ params }) => {
   }, [user]);
 
   const verifyUserRecord = async () => {
-    console.log(user);
-    console.log(params);
+    // console.log(user);
+    // console.log(params);
     const { data, error } = await supabase
       .from("listing")
       .select(
@@ -64,7 +64,7 @@ const PropertyDetails = ({ params }) => {
       .eq("createdBy", user?.primaryEmailAddress.emailAddress)
       .eq("id", params.propID);
 
-    console.log("DATA - ", data);
+    // console.log("DATA - ", data);
 
     if (data) {
       setListing(data[0]);
@@ -80,17 +80,16 @@ const PropertyDetails = ({ params }) => {
     }
   };
 
-  const handleFormSubmit = async (formValue) => {
+  const handleFormSubmit = async (values, { setSubmitting }) => {
     setLoading(true);
     const { data, error } = await supabase
       .from("listing")
-      .update(formValue)
+      .update(values)
       .eq("id", params.propID)
       .select();
 
     if (data) {
       console.log(data);
-      toast("Listing Updated Successfully");
     }
 
     for (let i = 0; i < images.length; i++) {
@@ -122,16 +121,21 @@ const PropertyDetails = ({ params }) => {
           ])
           .select();
 
+        if (data) {
+          setLoading(false);
+          toast("Listing Updated");
+        }
+
         if (error) {
           setLoading(false);
         }
       }
     }
     setLoading(false);
-    router.push("/");
     if (error) {
       console.log(error);
     }
+    setSubmitting(false);
   };
 
   const PublishButtonHandler = async () => {
@@ -143,8 +147,11 @@ const PropertyDetails = ({ params }) => {
       .select();
 
     if (data) {
+      // console.log(data);
       toast("Listing Published");
       setLoading(false);
+      // FOR NOW -
+      router.push("/sell");
     }
     if (error) {
       toast("Error occured while publishing");
@@ -160,13 +167,11 @@ const PropertyDetails = ({ params }) => {
 
       <Formik
         initialValues={{
+          type: "Sell",
           profileImage: user?.imageUrl,
           fullName: user?.fullName,
         }}
-        onSubmit={(values) => {
-          // console.log(values);
-          handleFormSubmit(values);
-        }}
+        onSubmit={handleFormSubmit}
       >
         {({ values, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
@@ -179,16 +184,21 @@ const PropertyDetails = ({ params }) => {
                   </div>
                   <RadioGroup
                     defaultValue={listing?.type || "Sell"}
-                    onValueChange={(e) => (values.type = e)}
+                    onValueChange={(e) => {
+                      // console.log(e);
+                      return (values.type = e);
+                    }}
+                    // onValueChange={(e) => console.log(e)}
+                    name="type"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Sell" type="Sell" id="Sell" />
+                      <RadioGroupItem value="Sell" id="Sell" />
                       <Label htmlFor="Sell" className="text-[15px]">
                         Sell
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Rent" type="Rent" id="Rent" />
+                      <RadioGroupItem value="Rent" id="Rent" />
                       <Label htmlFor="Rent" className="text-[15px]">
                         Rent
                       </Label>
@@ -208,12 +218,12 @@ const PropertyDetails = ({ params }) => {
                     name="propertyType"
                     onValueChange={(e) => (values.propertyType = e)}
                   >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[200px]">
                       <SelectValue
-                        className="text-[12px] md:text-[15px]"
+                        className="text-[12px] lg:text-[15px]"
                         placeholder={
                           listing
-                            ? listing?.proprtyType
+                            ? listing?.propertyType
                             : "Select Property Type"
                         }
                       />
@@ -390,7 +400,7 @@ const PropertyDetails = ({ params }) => {
                 <div className="px-4 pt-5 grid grid-cols-3 lg:grid-cols-6 xl:grid-cols-10 gap-3">
                   {previewPhoto.length > 0 &&
                     previewPhoto.map((image) => (
-                      <div key={image} className="relative">
+                      <div key={image?.url} className="relative">
                         <Image
                           src={image?.url}
                           alt={`image`}
@@ -413,7 +423,7 @@ const PropertyDetails = ({ params }) => {
               <div className="flex flex-row justify-end gap-x-2">
                 <Button
                   variant="outline"
-                  className="text-primary bg-primary"
+                  className="text-primary border-primary hover:text-primary"
                   type="submit"
                   disabled={loading}
                 >
