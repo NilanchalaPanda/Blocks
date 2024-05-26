@@ -22,106 +22,90 @@ import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import FileUpload from "../_components/FileUpload";
+import { Loader } from "lucide-react";
 
 const PropertyDetails = ({ params }) => {
   // HANLDE IMAGE UPLOAD
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [listing, setListing] = useState([]);
 
   const { user } = useUser();
   const router = useRouter();
 
-  // useEffect(() => {
-  //   user && verifyUserRecord();
-  //   console.log(user);
-  // }, [user]);
+  useEffect(() => {
+    user && verifyUserRecord();
+  }, [user]);
 
-  // const verifyUserRecord = async () => {
-  //   console.log("PARAMS : ", params.id);
-  //   console.log("2 - ", user);
-  //   const { data, error } = await supabase
-  //     .from("listing")
-  //     .select("*")
-  //     // .eq("createdBy", user?.primaryEmailAddress.emailAddress)
-  //     .eq("id", params.id);
+  const verifyUserRecord = async () => {
+    const { data, error } = await supabase
+      .from("listing")
+      .select("*")
+      .eq("createdBy", user?.primaryEmailAddress.emailAddress)
+      .eq("id", params.propID);
 
-  //   if (error) {
-  //     console.error("Error querying database:", error);
-  //     router.replace("/");
-  //     return;
-  //   }
+    console.log("DATA - ", data);
 
-  //   console.log("Database query result:", data);
+    if (data) {
+      setListing(data[0]);
+    }
+    if (data?.length <= 0) {
+      toast("Not Authorized to access this property");
+      router.push("/");
+    }
 
-  //   if (!data || data.length === 0) {
-  //     console.log("No matching record found.");
-  //     router.replace("/");
-  //   }
-  // };
-
-  // console.log(images);
-  // for (const image in images) {
-  //   console.log(Date.now().toString().split(".").pop());
-  // }
-
-  console.log(images);
+    if (error) {
+      console.log(error);
+    }
+  };
 
   const handleFormSubmit = async (formValue) => {
-    // const { data, error } = await supabase
-    //   .from("listing")
-    //   .update(formValue)
-    //   .eq("id", params.propID)
-    //   .select();
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("listing")
+      .update(formValue)
+      .eq("id", params.propID)
+      .select();
 
-    // if (data) {
-    //   console.log(data);
-    //   toast("Listing Updated Successfully");
-    // }
+    if (data) {
+      console.log(data);
+      toast("Listing Updated Successfully");
+    }
 
     for (let i = 0; i < images.length; i++) {
       console.log(images);
       console.log(images[i].name);
+      const fileName = Date.now().toString();
 
       const { data, error } = await supabase.storage
         .from("listingImages")
-        .upload(images[i]?.name, images[i], {
+        .upload(fileName, images[i], {
           contentType: images[i].type,
           upsert: false,
         });
 
       if (error) {
-        console.log(error);
-      }
+        toast("Error while uploading image");
+      } else {
+        const imageURL =
+          process.env.NEXT_PUBLIC_SUPABASE_IMAGE_URL + "/" + fileName;
 
-      if (data) {
-        console.log(data);
-        toast("File uploaded");
+        const { data, error } = await supabase
+          .from("listingImages")
+          .insert([
+            {
+              url: imageURL,
+              listing_id: params?.propID,
+            },
+          ])
+          .select();
       }
     }
-
-    // for (const image in images) {
-    //   let index = 0;
-    //   console.log(images);
-    //   console.log(images[index].name);
-    //   console.log(image.type);
-    //   console.log(image.name);
-    //   const { data, error } = await supabase.storage
-    //     .from("listingImages")
-    //     .upload(`{image?.name}`, image, {
-    //       contentType: image.type,
-    //       upsert: false,
-    //     });
-    //   if (error) {
-    //     console.log(error);
-    //     toast("Error uploading file");
-    //   } else {
-    //     toast("File uploaded");
-    //     index++;
-    //   }
-    // }
-
-    // if (error) {
-    //   console.log(error);
-    // }
+    setLoading(false);
+    router.push("/");
+    if (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -215,6 +199,7 @@ const PropertyDetails = ({ params }) => {
                     Bedroom
                   </div>
                   <Input
+                    defaultValue={listing?.bedroom}
                     type="number"
                     placeholder="Ex: 3"
                     className="w-[90%]"
@@ -228,6 +213,7 @@ const PropertyDetails = ({ params }) => {
                     Bathroom
                   </div>
                   <Input
+                    defaultValue={listing?.bathroom}
                     type="number"
                     placeholder="Ex: 2"
                     className="w-[90%]"
@@ -241,6 +227,7 @@ const PropertyDetails = ({ params }) => {
                     Built In
                   </div>
                   <Input
+                    defaultValue={listing?.builtIn}
                     type="number"
                     placeholder="Ex: 1900 Sq.ft"
                     className="w-[90%]"
@@ -257,6 +244,7 @@ const PropertyDetails = ({ params }) => {
                     Parking
                   </div>
                   <Input
+                    defaultValue={listing?.parking}
                     type="number"
                     placeholder="Ex: 3"
                     className="w-[90%]"
@@ -270,6 +258,7 @@ const PropertyDetails = ({ params }) => {
                     Lot Size (Sq.ft)
                   </div>
                   <Input
+                    defaultValue={listing?.lotSize}
                     type="number"
                     placeholder="Ex: 2"
                     className="w-[90%]"
@@ -283,6 +272,7 @@ const PropertyDetails = ({ params }) => {
                     Area (Sq.ft)
                   </div>
                   <Input
+                    defaultValue={listing?.area}
                     type="number"
                     placeholder="Ex: 1900 Sq.ft"
                     className="w-[90%]"
@@ -299,6 +289,7 @@ const PropertyDetails = ({ params }) => {
                     Selling Price ($)
                   </div>
                   <Input
+                    defaultValue={listing?.price}
                     type="number"
                     placeholder="Ex: 3"
                     className="w-[90%]"
@@ -312,6 +303,7 @@ const PropertyDetails = ({ params }) => {
                     HOA (Per Month - $)
                   </div>
                   <Input
+                    defaultValue={listing?.hoa}
                     type="number"
                     placeholder="Ex: 2"
                     className="w-[90%]"
@@ -327,6 +319,7 @@ const PropertyDetails = ({ params }) => {
                   Description
                 </div>
                 <Textarea
+                  defaultValue={listing?.description}
                   className="text-[15px]"
                   placeholder="Type your message here."
                   name="description"
@@ -344,11 +337,15 @@ const PropertyDetails = ({ params }) => {
 
               {/* SUBMIT THE WHOLE FORM BRO :) */}
               <div className="flex flex-row justify-end gap-x-2">
-                <Button type="submit" variant="outline">
-                  Save
-                </Button>
+                <Button variant="outline">Save</Button>
 
-                <Button>Save & Publish</Button>
+                <Button type="submit">
+                  {loading ? (
+                    <Loader className="animate-spin" />
+                  ) : (
+                    "Save & Publish"
+                  )}
+                </Button>
               </div>
             </div>
           </form>

@@ -9,20 +9,27 @@ const FileUpload = ({ setImages }) => {
   const [fileList, setFileList] = useState([]);
 
   const handleFileChange = (e) => {
-    const newfiles = Array.from(e.target.files);
-    console.log(newfiles);
+    try {
+      const newfiles = Array.from(e.target.files);
+      console.log(newfiles);
 
-    const combinedFiles = [...fileList, ...newfiles];
-    console.log(combinedFiles);
-    setFileList(combinedFiles);
-    setImages(combinedFiles);
+      const combinedFiles = [...fileList, ...newfiles];
+      console.log(combinedFiles);
+      setFileList(combinedFiles);
+      console.log(fileList);
+      setImages(combinedFiles);
 
-    const images = Array.from(newfiles).map((file) =>
-      URL.createObjectURL(file)
-    );
+      const images = Array.from(newfiles).map((file) =>
+        URL.createObjectURL(file)
+      );
 
-    console.log("PREVIEW -", previewImages);
-    setPreviewImages((prevImages) => [...prevImages, ...images]);
+      console.log("PREVIEW -", previewImages);
+      setPreviewImages((prevImages) => [...prevImages, ...images]);
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setFileList([]);
+    }
   };
 
   const handleRemoveImage = (e, image) => {
