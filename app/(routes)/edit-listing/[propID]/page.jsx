@@ -85,6 +85,7 @@ const PropertyDetails = ({ params }) => {
         });
 
       if (error) {
+        setLoading(false);
         toast("Error while uploading image");
       } else {
         const imageURL =
@@ -99,6 +100,10 @@ const PropertyDetails = ({ params }) => {
             },
           ])
           .select();
+
+        if (error) {
+          setLoading(false);
+        }
       }
     }
     setLoading(false);
@@ -115,7 +120,10 @@ const PropertyDetails = ({ params }) => {
       </h1>
 
       <Formik
-        initialValues={{}}
+        initialValues={{
+          profileImage: user?.imageUrl,
+          fullName: user?.fullName,
+        }}
         onSubmit={(values) => {
           console.log(values);
           handleFormSubmit(values);
@@ -127,12 +135,11 @@ const PropertyDetails = ({ params }) => {
               <div className="grid grid-cols-1 space-y-2 lg:grid-cols-3 lg:space-y-0">
                 {/* SELL OR RENT? */}
                 <div className="flex flex-col gap-2">
-                  {/* RENT OR SELL */}
                   <div className="text-[17px] md:text-xl text-slate-500">
                     Rent or Sell?
                   </div>
                   <RadioGroup
-                    defaultValue="Sell"
+                    defaultValue={listing?.type || "Sell"}
                     onValueChange={(e) => (values.type = e)}
                   >
                     <div className="flex items-center space-x-2">
@@ -156,13 +163,20 @@ const PropertyDetails = ({ params }) => {
                     Property Type
                   </div>
                   <Select
+                    defaultValue={
+                      listing?.propertyType || "Select Property Type"
+                    }
                     name="propertyType"
                     onValueChange={(e) => (values.propertyType = e)}
                   >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue
                         className="text-[12px] md:text-[15px]"
-                        placeholder="Select Property Type"
+                        placeholder={
+                          listing
+                            ? listing?.proprtyType
+                            : "Select Property Type"
+                        }
                       />
                     </SelectTrigger>
                     <SelectContent>
@@ -339,7 +353,7 @@ const PropertyDetails = ({ params }) => {
               <div className="flex flex-row justify-end gap-x-2">
                 <Button variant="outline">Save</Button>
 
-                <Button type="submit">
+                <Button type="submit" disabled={loading}>
                   {loading ? (
                     <Loader className="animate-spin" />
                   ) : (

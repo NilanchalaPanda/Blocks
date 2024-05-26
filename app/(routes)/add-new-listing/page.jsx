@@ -60,14 +60,11 @@ const AddNewListing = () => {
           Enter address which you want to list
         </h2>
         <GoogleAddressSearch
-          // selectedAddress={(value) => setSelectedAddress(value)}
-          // setCoordinates={(value) => setCoordinates(value)}
-
           setSelectedAddress={setSelectedAddress}
           setCoordinates={setCoordinates}
         />
         <Button
-          disabled={!selectedAddress || !coordinates}
+          disabled={!selectedAddress || !coordinates || loader}
           onClick={nextHandler}
           className="rounded-[5px] mt-3 mx-auto text-white w-[40%]"
         >
