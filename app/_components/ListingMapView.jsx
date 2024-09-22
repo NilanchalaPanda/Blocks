@@ -4,6 +4,7 @@ import Map from "./Map";
 import Listing from "./Listing";
 import { useEffect, useState } from "react";
 import supabase from "@utils/supabase/client";
+import { toast } from "sonner";
 
 const ListingMapView = ({ type }) => {
   const [listing, setListing] = useState([]);
@@ -31,8 +32,8 @@ const ListingMapView = ({ type }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2">
-      <div className="max-w-[1000px]">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2 px-4 lg:px-0">
+      <div className="max-w-[1000px] bg-slate-100/50 max-h-[650px] overflow-y-auto">
         <Listing listing={listing} />
       </div>
 

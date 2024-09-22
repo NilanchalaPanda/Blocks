@@ -11,9 +11,10 @@ const Listing = ({ listing }) => {
         {listing.length > 0
           ? listing.map((singleProp) => {
               const propAdd = singleProp?.address.substring(0, 70);
+              console.log(singleProp?.address);
 
               return (
-                <div className="p-2" key={singleProp.id}>
+                <div className="p-2" key={singleProp?.address}>
                   <div className="transition-all ease-in-out duration-100 p-3 rounded-xl group hover:bg-primary/10">
                     <Image
                       src={singleProp?.listingImages[0]?.url}
